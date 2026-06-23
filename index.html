@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>特選之路｜高三生的選擇模擬</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #FAF7F2;
+    --ink: #1C1C1E;
+    --ink-soft: #4A4A52;
+    --ink-muted: #8E8E96;
+    --accent: #C06B3A;
+    --accent-light: #F5E6DA;
+    --green: #3A7D5A;
+    --green-light: #E0F0E8;
+    --red: #C03A3A;
+    --red-light: #F5E0E0;
+    --blue: #3A5AC0;
+    --blue-light: #E0E6F5;
+    --border: rgba(28,28,30,0.1);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  html, body {
+    min-height: 100vh;
+    background: var(--cream);
+    font-family: 'Noto Sans TC', 'Hiragino Kaku Gothic ProN', sans-serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem 4rem;
+  }
+
+  /* ── 頂部標題列 ── */
+  .game-header {
+    width: 100%;
+    max-width: 560px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+  .game-logo {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-muted);
+    letter-spacing: 0.06em;
+  }
+  .progress-wrap {
+    flex: 1;
+    margin: 0 1rem;
+    height: 3px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 99px;
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  }
+  .scene-counter {
+    font-size: 12px;
+    color: var(--ink-muted);
+    font-weight: 500;
+  }
+
+  /* ── 主卡片 ── */
+  .card {
+    width: 100%;
+    max-width: 560px;
+    background: #fff;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    animation: fadeUp 0.4s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── 插圖區 ── */
+  .illustration-wrap {
+    width: 100%;
+    background: var(--accent-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.5rem 1.5rem;
+    min-height: 200px;
+    position: relative;
+  }
+  .illustration-wrap svg {
+    width: 100%;
+    max-width: 360px;
+    height: auto;
+  }
+
+  /* ── 場景標籤 ── */
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 3px 10px;
+    border-radius: 99px;
+    margin-bottom: 0.6rem;
+  }
+  .badge-month  { background: #EDE9FE; color: #5B21B6; }
+  .badge-warn   { background: #FEF3C7; color: #92400E; }
+  .badge-danger { background: #FEE2E2; color: #991B1B; }
+
+  /* ── 文字區 ── */
+  .card-body { padding: 1.5rem 1.5rem 0; }
+  .scene-hook {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--ink);
+    margin-bottom: 0.3rem;
+  }
+  .scene-sub {
+    font-size: 13px;
+    color: var(--ink-muted);
+    font-style: italic;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+  }
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin-bottom: 1rem;
+  }
+  .scene-text {
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.85;
+    margin-bottom: 1.5rem;
+  }
+
+  /* ── 選項 ── */
+  .choices { padding: 0 1.5rem 1.5rem; display: flex; flex-direction: column; gap: 10px; }
+  .choice-btn {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--ink);
+    cursor: pointer;
+    text-align: left;
+    line-height: 1.6;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  }
+  .choice-btn:hover:not(:disabled) {
+    background: #fff;
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+  .choice-btn:active:not(:disabled) { transform: scale(0.98); }
+  .choice-btn.correct { border-color: var(--green); background: var(--green-light); color: #1A4731; }
+  .choice-btn.wrong   { border-color: var(--red);   background: var(--red-light);   color: #6B1A1A; }
+  .choice-btn.neutral { border-color: var(--blue);  background: var(--blue-light);  color: #1A2F6B; }
+  .choice-btn:disabled { cursor: default; }
+
+  /* ── 回饋 ── */
+  .feedback-box {
+    margin: 0 1.5rem 0;
+    padding: 12px 14px;
+    background: var(--cream);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.7;
+    animation: fadeUp 0.3s ease both;
+  }
+  .next-btn {
+    display: block;
+    width: calc(100% - 3rem);
+    margin: 1rem 1.5rem 1.5rem;
+    padding: 13px;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-family: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: background 0.15s, transform 0.1s;
+    animation: fadeUp 0.3s 0.1s ease both;
+  }
+  .next-btn:hover { background: #333; }
+  .next-btn:active { transform: scale(0.98); }
+
+  /* ── 結局 ── */
+  .end-illustration {
+    width: 100%;
+    background: var(--accent-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.5rem;
+    min-height: 180px;
+  }
+  .end-body { padding: 1.5rem; }
+  .end-hook { font-size: 22px; font-weight: 700; color: var(--ink); margin-bottom: 0.3rem; line-height: 1.3; }
+  .end-sub  { font-size: 13px; color: var(--ink-muted); font-style: italic; margin-bottom: 1rem; }
+  .end-desc {
+    font-size: 13px; color: var(--ink-soft); line-height: 1.8;
+    background: var(--cream); border-radius: var(--radius-sm);
+    padding: 1rem 1.1rem; margin-bottom: 1.25rem;
+  }
+  .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.25rem; }
+  .score-card { background: var(--cream); border-radius: var(--radius-sm); padding: 0.75rem 1rem; }
+  .score-label { font-size: 11px; color: var(--ink-muted); margin-bottom: 3px; }
+  .score-value { font-size: 22px; font-weight: 700; color: var(--ink); }
+  .source-note { font-size: 11px; color: var(--ink-muted); line-height: 1.6; margin-bottom: 1.25rem; }
+  .restart-btn {
+    display: block; width: 100%; padding: 13px;
+    background: var(--ink); color: #fff; border: none;
+    border-radius: var(--radius-sm); font-size: 14px;
+    font-family: inherit; font-weight: 500; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .restart-btn:hover { background: #333; }
+
+  /* ── 開場畫面 ── */
+  .intro-card {
+    width: 100%;
+    max-width: 560px;
+    background: #fff;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    animation: fadeUp 0.5s ease both;
+  }
+  .intro-illus {
+    width: 100%;
+    background: var(--accent-light);
+    display: flex; align-items: center; justify-content: center;
+    padding: 2.5rem 2rem;
+    min-height: 220px;
+  }
+  .intro-body { padding: 2rem; }
+  .intro-tag { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: var(--accent); margin-bottom: 0.75rem; text-transform: uppercase; }
+  .intro-title { font-size: 26px; font-weight: 700; line-height: 1.3; color: var(--ink); margin-bottom: 0.5rem; }
+  .intro-desc { font-size: 13px; color: var(--ink-soft); line-height: 1.8; margin-bottom: 1.75rem; }
+  .intro-meta { display: flex; gap: 1.5rem; margin-bottom: 1.75rem; }
+  .intro-meta-item { font-size: 12px; color: var(--ink-muted); }
+  .intro-meta-item strong { display: block; font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+  .start-btn {
+    display: block; width: 100%; padding: 14px;
+    background: var(--ink); color: #fff; border: none;
+    border-radius: var(--radius-sm); font-size: 15px;
+    font-family: inherit; font-weight: 700; cursor: pointer;
+    letter-spacing: 0.05em; transition: background 0.15s;
+  }
+  .start-btn:hover { background: #333; }
+
+  @media (max-width: 480px) {
+    .scene-hook { font-size: 17px; }
+    .intro-title { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script>
+/* ────────────────────────────────────────────
+   SVG 插圖（日系扁平風）
+──────────────────────────────────────────── */
+const svgs = {
+
+  intro: `<svg viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg">
+    <!-- 天空 -->
+    <rect width="360" height="200" fill="#FDE8D4" rx="12"/>
+    <!-- 山 -->
+    <polygon points="0,200 80,90 160,200" fill="#E8C9A8"/>
+    <polygon points="60,200 160,70 260,200" fill="#D4A882"/>
+    <polygon points="160,200 270,85 360,200" fill="#C8956A"/>
+    <!-- 太陽 -->
+    <circle cx="300" cy="50" r="28" fill="#F5B87A" opacity="0.9"/>
+    <!-- 學校建築 -->
+    <rect x="110" y="120" width="140" height="80" fill="#F0D5B8" rx="4"/>
+    <rect x="100" y="108" width="160" height="16" fill="#D4956A" rx="2"/>
+    <rect x="155" y="148" width="50" height="52" fill="#C8895A"/>
+    <!-- 窗 -->
+    <rect x="120" y="128" width="24" height="22" fill="#AED6E8" rx="2"/>
+    <rect x="154" y="128" width="24" height="22" fill="#AED6E8" rx="2"/>
+    <rect x="216" y="128" width="24" height="22" fill="#AED6E8" rx="2"/>
+    <!-- 小人 -->
+    <circle cx="180" cy="86" r="10" fill="#F4C89A"/>
+    <rect x="173" y="96" width="14" height="18" fill="#5B7CBF" rx="3"/>
+    <rect x="168" y="98" width="8" height="3" fill="#5B7CBF" rx="1"/>
+    <rect x="184" y="98" width="8" height="3" fill="#5B7CBF" rx="1"/>
+    <!-- 書包 -->
+    <rect x="186" y="97" width="10" height="14" fill="#C06B3A" rx="2"/>
+    <!-- 問號氣泡 -->
+    <ellipse cx="200" cy="72" rx="18" ry="14" fill="white" opacity="0.92"/>
+    <text x="200" y="77" text-anchor="middle" font-size="14" fill="#C06B3A" font-weight="700">？</text>
+  </svg>`,
+
+  s0: `<svg viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg">
+    <!-- 背景 -->
+    <rect width="360" height="200" fill="#FDE8D4" rx="12"/>
+    <!-- 書桌 -->
+    <rect x="40" y="130" width="280" height="12" fill="#C8956A" rx="3"/>
+    <rect x="55" y="142" width="10" height="40" fill="#B07850"/>
+    <rect x="295" y="142" width="10" height="40" fill="#B07850"/>
+    <!-- 筆電 -->
+    <rect x="130" y="88" width="110" height="44" fill="#4A4A52" rx="4"/>
+    <rect x="134" y="91" width="102" height="37" fill="#AED6E8" rx="2"/>
+    <rect x="118" y="132" width="134" height="6" fill="#3A3A42" rx="2"/>
+    <!-- 螢幕內容（大學網頁感） -->
+    <rect x="138" y="95" width="60" height="4" fill="#C06B3A" rx="1"/>
+    <rect x="138" y="103" width="90" height="3" fill="#ddd" rx="1"/>
+    <rect x="138" y="109" width="75" height="3" fill="#ddd" rx="1"/>
+    <rect x="138" y="115" width="82" height="3" fill="#ddd" rx="1"/>
+    <rect x="138" y="121" width="55" height="3" fill="#ddd" rx="1"/>
+    <!-- 馬克杯 -->
+    <rect x="268" y="100" width="28" height="32" fill="#F5E6DA" rx="3" stroke="#D4956A" stroke-width="1"/>
+    <path d="M296,108 Q310,108 310,116 Q310,124 296,124" fill="none" stroke="#D4956A" stroke-width="1.5"/>
+    <text x="282" y="120" text-anchor="middle" font-size="11" fill="#C06B3A">☕</text>
+    <!-- 筆記本 -->
+    <rect x="58" y="98" width="58" height="34" fill="#FFFBF7" rx="2" stroke="#E8C9A8" stroke-width="1"/>
+    <line x1="65" y1="107" x2="108" y2="107" stroke="#E8C9A8" stroke-width="1"/>
+    <line x1="65" y1="113" x2="108" y2="113" stroke="#E8C9A8" stroke-width="1"/>
+    <line x1="65" y1="119" x2="95" y2="119" stroke="#E8C9A8" stroke-width="1"/>
+    <!-- 人物 -->
+    <circle cx="185" cy="55" r="22" fill="#F4C89A"/>
+    <rect x="172" y="0" width="26" height="42" fill="#2D2D35" rx="2"/>
+    <!-- 頭髮 -->
+    <ellipse cx="185" cy="36" rx="22" ry="8" fill="#2D2D35"/>
+    <!-- 眼睛 -->
+    <circle cx="178" cy="57" r="3" fill="#2D2D35"/>
+    <circle cx="192" cy="57" r="3" fill="#2D2D35"/>
+    <!-- 嘴 -->
+    <path d="M180,65 Q185,69 190,65" fill="none" stroke="#2D2D35" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- 衣服 -->
+    <rect x="166" y="76" width="38" height="28" fill="#5B7CBF" rx="4"/>
+    <!-- 燈泡 -->
+    <ellipse cx="308" cy="48" rx="16" ry="16" fill="#FAD07A" opacity="0.9"/>
+    <rect x="303" y="63" width="10" height="5" fill="#D4956A" rx="1"/>
+    <line x1="308" y1="25" x2="308" y2="18" stroke="#FAD07A" stroke-width="2"/>
+    <line x1="323" y1="33" x2="328" y2="27" stroke="#FAD07A" stroke-width="2"/>
+    <line x1="293" y1="33" x2="288" y2="27" stroke="#FAD07A" stroke-width="2"/>
+  </svg>`,
+
+  s1: `<svg viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="360" height="200" fill="#FDE8D4" rx="12"/>
+    <!-- 桌子 -->
+    <rect x="30" y="138" width="300" height="10" fill="#C8956A" rx="3"/>
+    <!-- 資料夾堆 -->
+    <rect x="50" y="90" width="70" height="50" fill="#AED6E8" rx="4"/>
+    <rect x="44" y="86" width="70" height="8" fill="#7BBFD4" rx="3"/>
+    <rect x="60" y="100" width="50" height="3" fill="#fff" opacity="0.6" rx="1"/>
+    <rect x="60" y="108" width="42" height="3" fill="#fff" opacity="0.6" rx="1"/>
+    <rect x="60" y="116" width="48" height="3" fill="#fff" opacity="0.6" rx="1"/>
+
+    <rect x="140" y="80" width="70" height="60" fill="#F4C89A" rx="4"/>
+    <rect x="134" y="76" width="70" height="8" fill="#D4956A" rx="3"/>
+    <rect x="150" y="93" width="50" height="3" fill="#fff" opacity="0.6" rx="1"/>
+    <rect x="150" y="101" width="38" height="3" fill="#fff" opacity="0.6" rx="1"/>
+    <rect x="150" y="109" width="45" height="3" fill="#fff" opacity="0.6" rx="1"/>
+    <!-- 特選作品集（紅色資料夾，重點） -->
+    <rect x="235" y="72" width="80" height="68" fill="#F0A080" rx="4"/>
+    <rect x="229" y="68" width="80" height="10" fill="#C06B3A" rx="3"/>
+    <text x="275" y="100" text-anchor="middle" font-size="11" fill="white" font-weight="700">作品集</text>
+    <rect x="247" y="107" width="56" height="3" fill="#fff" opacity="0.6" rx="1"/>
+    <rect x="247" y="114" width="44" height="3" fill="#fff" opacity="0.6" rx="1"/>
+    <rect x="247" y="121" width="50" height="3" fill="#fff" opacity="0.6" rx="1"/>
+    <!-- 人物（思考中） -->
+    <circle cx="185" cy="44" r="20" fill="#F4C89A"/>
+    <ellipse cx="185" cy="27" rx="20" ry="7" fill="#2D2D35"/>
+    <circle cx="178" cy="46" r="2.5" fill="#2D2D35"/>
+    <circle cx="192" cy="46" r="2.5" fill="#2D2D35"/>
+    <path d="M180,53 Q185,57 190,53" fill="none" stroke="#2D2D35" stroke-width="1.5" stroke-linecap="round"/>
+    <rect x="169" y="64" width="32" height="22" fill="#3A7D5A" rx="4"/>
+    <!-- 思考泡 -->
+    <circle cx="210" cy="22" r="4" fill="white" opacity="0.8"/>
+    <circle cx="220" cy="14" r="6" fill="white" opacity="0.8"/>
+    <ellipse cx="235" cy="8" rx="14" ry="10" fill="white" opacity="0.9"/>
+    <text x="235" y="12" text-anchor="middle" font-size="10" fill="#C06B3A">精選！</text>
+    <!-- 剪刀 -->
+    <text x="170" y="165" font-size="22">✂️</text>
+  </svg>`,
+
+  s2: `<svg viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="360" height="200" fill="#E8F4FD" rx="12"/>
+    <!-- 夜空感 -->
+    <circle cx="50" cy="35" r="18" fill="#FAD07A" opacity="0.85"/>
+    <circle cx="310" cy="25" r="4" fill="white" opacity="0.6"/>
+    <circle cx="340" cy="55" r="3" fill="white" opacity="0.5"/>
+    <circle cx="280" cy="40" r="2" fill="white" opacity="0.6"/>
+    <!-- 兩個人物對比 -->
+    <!-- 朋友（左，自信） -->
+    <circle cx="105" cy="85" r="22" fill="#F4D4A8"/>
+    <ellipse cx="105" cy="67" rx="22" ry="8" fill="#8B6914"/>
+    <circle cx="98" cy="87" r="2.5" fill="#2D2D35"/>
+    <circle cx="112" cy="87" r="2.5" fill="#2D2D35"/>
+    <path d="M100,95 Q105,100 110,95" fill="none" stroke="#2D2D35" stroke-width="1.5" stroke-linecap="round"/>
+    <rect x="88" y="107" width="34" height="28" fill="#5B7CBF" rx="4"/>
+    <!-- 越南旗幟 -->
+    <rect x="72" y="50" width="22" height="14" fill="#DA2020" rx="1"/>
+    <polygon points="83,53 86,59 80,59" fill="#FAD07A"/>
+    <line x1="72" y1="48" x2="72" y2="68" stroke="#8B6914" stroke-width="1.5"/>
+    <!-- 主角（右，猶豫） -->
+    <circle cx="255" cy="85" r="22" fill="#F4C89A"/>
+    <ellipse cx="255" cy="67" rx="22" ry="8" fill="#2D2D35"/>
+    <circle cx="248" cy="87" r="2.5" fill="#2D2D35"/>
+    <circle cx="262" cy="87" r="2.5" fill="#2D2D35"/>
+    <!-- 苦惱眉毛 -->
+    <path d="M245,81 Q248,78 251,81" fill="none" stroke="#2D2D35" stroke-width="1.5"/>
+    <path d="M259,81 Q262,78 265,81" fill="none" stroke="#2D2D35" stroke-width="1.5"/>
+    <path d="M250,95 Q255,92 260,95" fill="none" stroke="#2D2D35" stroke-width="1.5" stroke-linecap="round"/>
+    <rect x="238" y="107" width="34" height="28" fill="#C06B3A" rx="4"/>
+    <!-- 疑問氣泡 -->
+    <ellipse cx="290" cy="62" rx="28" ry="18" fill="white" opacity="0.92"/>
+    <text x="290" y="67" text-anchor="middle" font-size="13" fill="#C06B3A" font-weight="700">我夠嗎？</text>
+    <polygon points="272,76 265,85 280,78" fill="white" opacity="0.92"/>
+    <!-- 天秤 -->
+    <line x1="180" y1="55" x2="180" y2="110" stroke="#8B8B8B" stroke-width="2"/>
+    <line x1="140" y1="80" x2="220" y2="80" stroke="#8B8B8B" stroke-width="2"/>
+    <ellipse cx="140" cy="93" rx="20" ry="10" fill="#FAD07A" opacity="0.9"/>
+    <text x="140" y="97" text-anchor="middle" font-size="9" fill="#92400E">志工</text>
+    <ellipse cx="220" cy="86" rx="20" ry="10" fill="#AED6E8" opacity="0.9"/>
+    <text x="220" y="90" text-anchor="middle" font-size="9" fill="#1A3F6B">語言力</text>
+    <circle cx="180" cy="54" r="5" fill="#8B8B8B"/>
+  </svg>`,
+
+  s3: `<svg viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="360" height="200" fill="#FDE8D4" rx="12"/>
+    <!-- 面試室 -->
+    <rect x="20" y="100" width="320" height="80" fill="#FFFBF7" rx="4" stroke="#E8C9A8" stroke-width="1"/>
+    <!-- 桌子 -->
+    <rect x="60" y="128" width="240" height="10" fill="#D4956A" rx="3"/>
+    <rect x="75" y="138" width="10" height="32" fill="#C8895A"/>
+    <rect x="275" y="138" width="10" height="32" fill="#C8895A"/>
+    <!-- 教授（左2人） -->
+    <circle cx="110" cy="100" r="18" fill="#F4D4A8"/>
+    <ellipse cx="110" cy="84" rx="18" ry="7" fill="#5A3A1A"/>
+    <circle cx="104" cy="102" r="2" fill="#2D2D35"/>
+    <circle cx="116" cy="102" r="2" fill="#2D2D35"/>
+    <path d="M106,109 Q110,113 114,109" fill="none" stroke="#2D2D35" stroke-width="1.2"/>
+    <rect x="96" y="118" width="28" height="22" fill="#3A3A8B" rx="3"/>
+    <!-- 眼鏡 -->
+    <circle cx="104" cy="102" r="5" fill="none" stroke="#8B8B8B" stroke-width="1"/>
+    <circle cx="116" cy="102" r="5" fill="none" stroke="#8B8B8B" stroke-width="1"/>
+    <line x1="109" y1="102" x2="111" y2="102" stroke="#8B8B8B" stroke-width="1"/>
+
+    <circle cx="160" cy="100" r="18" fill="#F4C0A0"/>
+    <ellipse cx="160" cy="84" rx="18" ry="7" fill="#2D1A0A"/>
+    <circle cx="154" cy="102" r="2" fill="#2D2D35"/>
+    <circle cx="166" cy="102" r="2" fill="#2D2D35"/>
+    <path d="M156,109 Q160,112 164,109" fill="none" stroke="#2D2D35" stroke-width="1.2"/>
+    <rect x="146" y="118" width="28" height="22" fill="#5A3A6B" rx="3"/>
+    <!-- 主角（右） -->
+    <circle cx="265" cy="96" r="22" fill="#F4C89A"/>
+    <ellipse cx="265" cy="78" rx="22" ry="8" fill="#2D2D35"/>
+    <circle cx="258" cy="98" r="2.5" fill="#2D2D35"/>
+    <circle cx="272" cy="98" r="2.5" fill="#2D2D35"/>
+    <path d="M260,106 Q265,110 270,106" fill="none" stroke="#2D2D35" stroke-width="1.5" stroke-linecap="round"/>
+    <rect x="250" y="118" width="30" height="22" fill="#C06B3A" rx="3"/>
+    <!-- 作品集 -->
+    <rect x="240" y="108" width="18" height="22" fill="#F0A080" rx="2"/>
+    <rect x="237" y="105" width="18" height="4" fill="#C06B3A" rx="1"/>
+    <!-- 麥克風感（說話線） -->
+    <path d="M250,90 Q240,78 225,75" fill="none" stroke="#C06B3A" stroke-width="1.5" stroke-dasharray="3,2"/>
+    <ellipse cx="215" cy="73" rx="22" ry="12" fill="white" opacity="0.92"/>
+    <text x="215" y="77" text-anchor="middle" font-size="10" fill="#C06B3A" font-weight="700">我可以！</text>
+  </svg>`,
+
+  s4: `<svg viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="360" height="200" fill="#FDE8D4" rx="12"/>
+    <!-- 信箱 -->
+    <rect x="120" y="70" width="120" height="90" fill="#FFFBF7" rx="6" stroke="#E8C9A8" stroke-width="1.5"/>
+    <path d="M120,70 L180,110 L240,70" fill="none" stroke="#E8C9A8" stroke-width="1.5"/>
+    <!-- 信紙 -->
+    <rect x="145" y="90" width="70" height="55" fill="#AED6E8" rx="3"/>
+    <rect x="152" y="98" width="56" height="3" fill="white" opacity="0.7" rx="1"/>
+    <rect x="152" y="105" width="45" height="3" fill="white" opacity="0.7" rx="1"/>
+    <rect x="152" y="112" width="50" height="3" fill="white" opacity="0.7" rx="1"/>
+    <!-- 愛心or叉叉（放榜結果，用問號） -->
+    <circle cx="180" cy="128" r="14" fill="#FAD07A"/>
+    <text x="180" y="133" text-anchor="middle" font-size="14" fill="#92400E" font-weight="700">？</text>
+    <!-- 人物（期待又緊張） -->
+    <circle cx="88" cy="80" r="22" fill="#F4C89A"/>
+    <ellipse cx="88" cy="62" rx="22" ry="8" fill="#2D2D35"/>
+    <circle cx="81" cy="82" r="2.5" fill="#2D2D35"/>
+    <circle cx="95" cy="82" r="2.5" fill="#2D2D35"/>
+    <!-- 緊張汗水 -->
+    <ellipse cx="101" cy="76" rx="4" ry="6" fill="#AED6E8" opacity="0.7"/>
+    <path d="M83,90 Q88,87 93,90" fill="none" stroke="#2D2D35" stroke-width="1.5"/>
+    <rect x="72" y="102" width="32" height="24" fill="#5B7CBF" rx="4"/>
+    <!-- 手 -->
+    <rect x="104" y="108" width="8" height="16" fill="#F4C89A" rx="3"/>
+    <!-- 另一人物（已準備學測） -->
+    <circle cx="292" cy="80" r="22" fill="#F4D4A8"/>
+    <ellipse cx="292" cy="62" rx="22" ry="8" fill="#5A3A1A"/>
+    <circle cx="285" cy="82" r="2.5" fill="#2D2D35"/>
+    <circle cx="299" cy="82" r="2.5" fill="#2D2D35"/>
+    <path d="M287,91 Q292,95 297,91" fill="none" stroke="#2D2D35" stroke-width="1.5"/>
+    <rect x="276" y="102" width="32" height="24" fill="#3A7D5A" rx="4"/>
+    <!-- 書 -->
+    <rect x="256" y="108" width="12" height="16" fill="#FAD07A" rx="1"/>
+    <line x1="262" y1="108" x2="262" y2="124" stroke="#D4956A" stroke-width="0.8"/>
+    <!-- 文字提示 -->
+    <text x="292" y="148" text-anchor="middle" font-size="10" fill="#3A7D5A" font-weight="700">備案安全！</text>
+  </svg>`,
+
+  s5: `<svg viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="360" height="200" fill="#E8F5ED" rx="12"/>
+    <!-- 大學校園 -->
+    <rect x="20" y="110" width="320" height="70" fill="#C8E8D4" rx="4"/>
+    <!-- 建築 -->
+    <rect x="40" y="70" width="80" height="70" fill="#FFFBF7" rx="4" stroke="#A8D4B8" stroke-width="1"/>
+    <polygon points="40,70 80,40 120,70" fill="#C06B3A"/>
+    <rect x="70" y="110" width="20" height="30" fill="#AED6E8" rx="2"/>
+    <rect x="48" y="80" width="20" height="20" fill="#AED6E8" rx="2"/>
+    <rect x="92" y="80" width="20" height="20" fill="#AED6E8" rx="2"/>
+    <!-- 樹 -->
+    <rect x="155" y="105" width="8" height="25" fill="#8B6914"/>
+    <ellipse cx="159" cy="96" rx="22" ry="18" fill="#3A7D5A"/>
+    <ellipse cx="148" cy="100" rx="14" ry="12" fill="#4A9D6A"/>
+
+    <rect x="225" y="108" width="7" height="22" fill="#8B6914"/>
+    <ellipse cx="228" cy="100" rx="18" ry="15" fill="#3A7D5A"/>
+
+    <!-- 大樓（右） -->
+    <rect x="260" y="80" width="80" height="60" fill="#FFFBF7" rx="4" stroke="#A8D4B8" stroke-width="1"/>
+    <rect x="268" y="88" width="14" height="12" fill="#AED6E8" rx="1"/>
+    <rect x="288" y="88" width="14" height="12" fill="#AED6E8" rx="1"/>
+    <rect x="308" y="88" width="14" height="12" fill="#AED6E8" rx="1"/>
+    <rect x="268" y="106" width="14" height="12" fill="#AED6E8" rx="1"/>
+    <rect x="288" y="106" width="14" height="12" fill="#AED6E8" rx="1"/>
+    <rect x="308" y="106" width="14" height="12" fill="#AED6E8" rx="1"/>
+    <!-- 路 -->
+    <rect x="0" y="155" width="360" height="20" fill="#D4C8A8" rx="0"/>
+    <rect x="165" y="155" width="30" height="20" fill="#FFFBF7"/>
+    <!-- 學生們 -->
+    <circle cx="170" cy="130" r="14" fill="#F4C89A"/>
+    <ellipse cx="170" cy="118" rx="14" ry="5" fill="#2D2D35"/>
+    <circle cx="165" cy="132" r="1.8" fill="#2D2D35"/>
+    <circle cx="175" cy="132" r="1.8" fill="#2D2D35"/>
+    <path d="M167,139 Q170,142 173,139" fill="none" stroke="#2D2D35" stroke-width="1.2"/>
+    <rect x="160" y="144" width="20" height="16" fill="#C06B3A" rx="3"/>
+    <!-- 另一學生 -->
+    <circle cx="202" cy="128" r="14" fill="#F4D4A8"/>
+    <ellipse cx="202" cy="116" rx="14" ry="5" fill="#5A3A1A"/>
+    <circle cx="197" cy="130" r="1.8" fill="#2D2D35"/>
+    <circle cx="207" cy="130" r="1.8" fill="#2D2D35"/>
+    <path d="M199,137 Q202,140 205,137" fill="none" stroke="#2D2D35" stroke-width="1.2"/>
+    <rect x="192" y="142" width="20" height="16" fill="#5B7CBF" rx="3"/>
+    <!-- 對話 -->
+    <ellipse cx="186" cy="108" rx="20" ry="12" fill="white" opacity="0.9"/>
+    <text x="186" y="112" text-anchor="middle" font-size="9" fill="#3A7D5A" font-weight="700">一起加油！</text>
+    <polygon points="178,118 172,128 185,120" fill="white" opacity="0.9"/>
+  </svg>`,
+
+  end_high: `<svg viewBox="0 0 360 180" xmlns="http://www.w3.org/2000/svg">
+    <rect width="360" height="180" fill="#FDE8D4" rx="12"/>
+    <!-- 獎盃 -->
+    <rect x="152" y="110" width="56" height="12" fill="#D4956A" rx="2"/>
+    <rect x="140" y="120" width="80" height="8" fill="#C8895A" rx="2"/>
+    <rect x="163" y="88" width="34" height="24" fill="#FAD07A" rx="2"/>
+    <path d="M158,58 Q158,88 180,88 Q202,88 202,58 Z" fill="#FAD07A"/>
+    <path d="M158,65 Q140,65 140,80 Q140,92 158,92" fill="none" stroke="#D4956A" stroke-width="3"/>
+    <path d="M202,65 Q220,65 220,80 Q220,92 202,92" fill="none" stroke="#D4956A" stroke-width="3"/>
+    <polygon points="180,35 186,52 204,52 190,62 196,80 180,70 164,80 170,62 156,52 174,52" fill="#F5B87A"/>
+    <!-- 彩帶 -->
+    <path d="M60,30 Q80,60 70,90" fill="none" stroke="#C06B3A" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M80,20 Q90,55 75,85" fill="none" stroke="#FAD07A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M290,25 Q270,55 285,88" fill="none" stroke="#AED6E8" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M310,15 Q285,50 300,82" fill="none" stroke="#3A7D5A" stroke-width="2" stroke-linecap="round"/>
+    <!-- 星星 -->
+    <polygon points="50,50 54,63 68,63 57,71 61,84 50,76 39,84 43,71 32,63 46,63" fill="#FAD07A" opacity="0.8"/>
+    <polygon points="310,55 313,64 323,64 315,70 318,79 310,73 302,79 305,70 297,64 307,64" fill="#FAD07A" opacity="0.8"/>
+  </svg>`,
+
+  end_mid: `<svg viewBox="0 0 360 180" xmlns="http://www.w3.org/2000/svg">
+    <rect width="360" height="180" fill="#E8F5ED" rx="12"/>
+    <!-- 路徑感 -->
+    <path d="M30,160 Q100,120 180,100 Q260,80 330,50" fill="none" stroke="#3A7D5A" stroke-width="3" stroke-dasharray="8,4" stroke-linecap="round"/>
+    <!-- 腳印 -->
+    <ellipse cx="60" cy="155" rx="8" ry="5" fill="#3A7D5A" opacity="0.5" transform="rotate(-15,60,155)"/>
+    <ellipse cx="90" cy="143" rx="8" ry="5" fill="#3A7D5A" opacity="0.5" transform="rotate(-20,90,143)"/>
+    <ellipse cx="125" cy="128" rx="8" ry="5" fill="#3A7D5A" opacity="0.5" transform="rotate(-25,125,128)"/>
+    <!-- 書本（學習中） -->
+    <rect x="195" y="65" width="60" height="80" fill="#FFFBF7" rx="4" stroke="#A8D4B8" stroke-width="1"/>
+    <rect x="195" y="65" width="8" height="80" fill="#C06B3A" rx="4 0 0 4"/>
+    <rect x="207" y="78" width="40" height="3" fill="#E8C9A8" rx="1"/>
+    <rect x="207" y="86" width="35" height="3" fill="#E8C9A8" rx="1"/>
+    <rect x="207" y="94" width="38" height="3" fill="#E8C9A8" rx="1"/>
+    <rect x="207" y="102" width="32" height="3" fill="#C06B3A" rx="1"/>
+    <rect x="207" y="110" width="40" height="3" fill="#E8C9A8" rx="1"/>
+    <!-- 人物（走路中） -->
+    <circle cx="155" cy="92" r="20" fill="#F4C89A"/>
+    <ellipse cx="155" cy="75" rx="20" ry="7" fill="#2D2D35"/>
+    <circle cx="148" cy="94" r="2.5" fill="#2D2D35"/>
+    <circle cx="162" cy="94" r="2.5" fill="#2D2D35"/>
+    <path d="M150,102 Q155,107 160,102" fill="none" stroke="#2D2D35" stroke-width="1.5"/>
+    <rect x="140" y="112" width="30" height="25" fill="#5B7CBF" rx="4"/>
+    <!-- 光點 -->
+    <circle cx="305" cy="48" r="6" fill="#FAD07A" opacity="0.9"/>
+    <circle cx="320" cy="32" r="4" fill="#FAD07A" opacity="0.7"/>
+    <circle cx="295" cy="30" r="3" fill="#FAD07A" opacity="0.6"/>
+  </svg>`,
+
+  end_low: `<svg viewBox="0 0 360 180" xmlns="http://www.w3.org/2000/svg">
+    <rect width="360" height="180" fill="#FEF3C7" rx="12"/>
+    <!-- 燈泡大圖 -->
+    <circle cx="180" cy="80" r="50" fill="#FAD07A" opacity="0.9"/>
+    <rect x="163" y="128" width="34" height="12" fill="#D4956A" rx="2"/>
+    <rect x="168" y="140" width="24" height="8" fill="#C8895A" rx="2"/>
+    <!-- 光芒 -->
+    <line x1="180" y1="20" x2="180" y2="8" stroke="#FAD07A" stroke-width="3" stroke-linecap="round"/>
+    <line x1="230" y1="35" x2="238" y2="26" stroke="#FAD07A" stroke-width="3" stroke-linecap="round"/>
+    <line x1="248" y1="80" x2="260" y2="80" stroke="#FAD07A" stroke-width="3" stroke-linecap="round"/>
+    <line x1="130" y1="35" x2="122" y2="26" stroke="#FAD07A" stroke-width="3" stroke-linecap="round"/>
+    <line x1="112" y1="80" x2="100" y2="80" stroke="#FAD07A" stroke-width="3" stroke-linecap="round"/>
+    <!-- 燈泡內部（人物小圖） -->
+    <circle cx="180" cy="72" r="14" fill="#F4C89A"/>
+    <ellipse cx="180" cy="61" rx="14" ry="5" fill="#2D2D35"/>
+    <circle cx="175" cy="74" r="2" fill="#2D2D35"/>
+    <circle cx="185" cy="74" r="2" fill="#2D2D35"/>
+    <path d="M176,81 Q180,85 184,81" fill="none" stroke="#2D2D35" stroke-width="1.2"/>
+    <!-- 文字 -->
+    <text x="180" y="165" text-anchor="middle" font-size="13" fill="#92400E" font-weight="700">下次一定可以！</text>
+  </svg>`
+};
+
+/* ────────────────────────────────────────────
+   遊戲資料
+──────────────────────────────────────────── */
+const scenes = [
+  {
+    id: 0, svg: 's0',
+    badge: { text: '高三 9月 · 故事開始', type: 'badge-month' },
+    hook: '你不想用分數定義自己',
+    sub: '但沒有分數，你要用什麼敲開大學的門？',
+    text: '暑假結束了。你對傳播、藝術，或程式有強烈熱情，但你一直覺得自己的才能無法被學測分數衡量。這時，你第一次聽說「特殊選才」——一個不用學測、以個人經歷與特殊才能直接申請大學的管道。\n\n你會怎麼做？',
+    choices: [
+      { text: '✅ 立刻查大學招生委員會的資訊，弄清楚特選流程、報名時間、哪些學校有開缺', outcome: 'good', next: 1 },
+      { text: '⚡ 聽起來超適合我！決定 All in 特選，學測就不用準備了', outcome: 'bad', next: 1 },
+      { text: '🤔 先問問老師，看學校有沒有資源協助', outcome: 'neutral', next: 1 }
+    ],
+    feedbacks: {
+      good: '很聰明！特選簡章通常 10、11 月才公布，資訊分散在各校，提早搜集非常重要。',
+      bad: '危險警報！特選充滿變數，All in 的心態讓許多有才華的人最後面臨學測慘況。',
+      neutral: '可惜，大多數高中老師對特選不熟悉，學校資源有限。但問了總比沒問好。'
+    }
+  },
+  {
+    id: 1, svg: 's1',
+    badge: { text: '高三 10月 · 書審備戰', type: 'badge-month' },
+    hook: '你有三年的故事，但只有幾頁紙能說',
+    sub: '什麼該放？什麼該捨？這是第一道關卡。',
+    text: '各校特選簡章陸續釋出。你發現不同科系的要求差異極大——有些要作品集、有些看學習歷程、有些要上機考試。\n\n你的書審資料打算怎麼呈現？',
+    choices: [
+      { text: '📁 把高中三年所有獎狀、活動、證書全部塞進去，越多越好', outcome: 'bad', next: 2 },
+      { text: '🎯 精選最相關的作品和經歷，針對科系特色突顯自己的獨特之處', outcome: 'good', next: 2 },
+      { text: '💸 去報名特選補習班，請顧問幫你規劃書審方向', outcome: 'neutral', next: 2 }
+    ],
+    feedbacks: {
+      good: '正確！教授看書審不是看「量」，而是看你能否說清楚自己為何適合這個科系。',
+      bad: '常見失誤！把不相關的資料塞進書審只會讓內容變籠統，讓教授看不清楚你的特色。',
+      neutral: '補習班確實有助整理備審方向，但費用不低，且對小眾科系的效果因人而異。'
+    }
+  },
+  {
+    id: 2, svg: 's2',
+    badge: { text: '高三 11月 · 自我懷疑', type: 'badge-warn' },
+    hook: '你夠「特殊」嗎？這個問題沒有標準答案',
+    sub: '當所有人看起來都比你更有資歷，你怎麼辦？',
+    text: '你的同學曾在越南擔任志工，看起來比你更有國際視野；但你有扎實的越南語能力和在地連結。你發現特選根本沒有明確標準，開始陷入迷茫……',
+    choices: [
+      { text: '😰 覺得自己不夠特殊，開始猶豫要不要繼續申請', outcome: 'bad', next: 3 },
+      { text: '💪 接受標準模糊的現實，相信自己的積累有其獨特價值，繼續準備', outcome: 'good', next: 3 },
+      { text: '🔍 去參加「長浪計畫」等學長姐分享會，了解真實的特選歷程', outcome: 'good', next: 3 }
+    ],
+    feedbacks: {
+      good: '對！特選審查標準本就模糊，這是制度的侷限，不是你不夠好。學長姐的真實分享能讓你看清現實、減少焦慮。',
+      bad: '小心自我否定的陷阱。沒有「夠不夠特殊」的標準答案，重要的是你能否清楚展現自己的獨特性。'
+    }
+  },
+  {
+    id: 3, svg: 's3',
+    badge: { text: '高三 12月 · 面試現場', type: 'badge-warn' },
+    hook: '你有才華，但你會說自己的故事嗎？',
+    sub: '教授不會主動挖掘你的亮點——你要主動讓他們看見。',
+    text: '你過了書審，進入面試！坐在教授面前，你有豐富的作品和經歷，但你平常不擅長開口推銷自己。\n\n教授問：「你為什麼適合這個科系？」',
+    choices: [
+      { text: '😶 謙虛地說：「我雖然有一些作品，但還不是很成熟……」', outcome: 'bad', next: 4 },
+      { text: '🗣️ 主動、自信地說明自己做了什麼、為什麼這樣做、未來想往哪個方向走', outcome: 'good', next: 4 },
+      { text: '📱 直接展示作品集和具體成果，用作品說話', outcome: 'good', next: 4 }
+    ],
+    feedbacks: {
+      good: '完美！特選面試的關鍵是主動展現優勢。「不要等教授自己發現你的才華」——這是過來人最重要的提醒。',
+      bad: '謙虛過頭是特選的致命傷。教授時間有限，你必須主動讓他們看見你的亮點。'
+    }
+  },
+  {
+    id: 4, svg: 's4',
+    badge: { text: '高三 12月底 · 放榜時刻', type: 'badge-danger' },
+    hook: '信封打開的那一秒，你的下一步是什麼？',
+    sub: '錄取或落榜，都還沒到終點。',
+    text: '特選結果出爐了！這是遊戲的關鍵分叉點。無論錄取或落榜，你現在都要立刻做出決定……',
+    choices: [
+      { text: '🎉 錄取了！立刻放棄學測準備，安心等入學', outcome: 'bad', next: 5 },
+      { text: '😞 落榜了——但我還有學測！立刻切換心態，全力備考', outcome: 'good', next: 5 },
+      { text: '📚 不管結果如何，我從未放棄學測準備，現在繼續', outcome: 'good', next: 5 }
+    ],
+    feedbacks: {
+      good: '正確心態！特選只是其中一條路，學測是最後的安全網。即使有作品、有熱情，特選結果仍充滿變數，備案永遠比 All in 安全。',
+      bad: '若錄取了當然沒問題，但若是落榜，你就必須在不到三個月內追趕學測進度——就像報導裡的黃暘，壓力極大。'
+    }
+  },
+  {
+    id: 5, svg: 's5',
+    badge: { text: '大學一年級 · 新的考驗', type: 'badge-month' },
+    hook: '進了大學，但比賽還沒結束',
+    sub: '當旁邊的同學是學測強者，你的優勢在哪裡？',
+    text: '你以特選管道進入大學，很快發現其他同學是透過學測競爭進來的，學科底子更紮實。大一第一學期，你面臨英文授課、高難度數學……\n\n你怎麼面對？',
+    choices: [
+      { text: '🙈 覺得自己先天不足，開始自我放棄', outcome: 'bad', next: 'end' },
+      { text: '📖 主動找學校的學習輔導資源，同時善用自己在實作上的強項', outcome: 'good', next: 'end' },
+      { text: '💬 去找系上的特選生輔導老師，了解有哪些專屬學習支援', outcome: 'good', next: 'end' }
+    ],
+    feedbacks: {
+      good: '做得好！特選生入學後常面臨學科適應壓力，但只要主動尋求資源、發揮實作優勢，就能找到自己的節奏。像成大資工系就為特選生配備了專屬輔導老師。',
+      bad: '可惜！特選生確實容易偏科，但這不是終點。校方輔導資源、專屬老師都在等你主動求助。'
+    }
+  }
+];
+
+const endings = {
+  high: { svgKey: 'end_high', hook: '你走出了一條屬於自己的路', sub: '資訊、策略、心態，你三樣都做到了', desc: '你在每個關鍵時刻做出了明智的判斷——蒐集資訊、精煉書審、主動面試、保留備案、入學後積極適應。這正是最理想的特選準備方式。特選制度充滿變數，但有準備的人總能找到屬於自己的出口。', label: '充分準備型' },
+  mid:  { svgKey: 'end_mid',  hook: '每一次跌倒都讓你更清醒', sub: '特選最大的課題，是在不確定中保持判斷力', desc: '這趟旅程不是每一步都走對，但你在挫折中成長。特選的本質是：在制度的不確定性裡，主動展現自己、保留退路、持續調整策略。', label: '歷程學習型' },
+  low:  { svgKey: 'end_low',  hook: '特選的路，比你想的更曲折', sub: '才華只是起點，策略與心態才是關鍵', desc: '特選不是「有才華就一定上」的捷徑，它同時需要資訊蒐集、清晰表達、心理準備和備案策略。這次模擬讓你看見了盲點——現實中的你還有機會重新出發！', label: '需要調整策略' }
+};
+
+/* ────────────────────────────────────────────
+   遊戲狀態
+──────────────────────────────────────────── */
+let current = -1, score = 0, total = 0, chosen = null, chosenNext = null, locked = false;
+
+function getEndKey() {
+  const r = score / Math.max(total, 1);
+  return r >= 0.7 ? 'high' : r >= 0.4 ? 'mid' : 'low';
+}
+
+/* ────────────────────────────────────────────
+   渲染函式
+──────────────────────────────────────────── */
+function renderIntro() {
+  document.getElementById('root').innerHTML = `
+    <div class="intro-card">
+      <div class="intro-illus">${svgs.intro}</div>
+      <div class="intro-body">
+        <div class="intro-tag">互動式升學模擬</div>
+        <div class="intro-title">特選之路<br>你準備好了嗎？</div>
+        <div class="intro-desc">
+          以第一人稱視角，走過一個高三生嘗試透過「特殊選才」升大學的真實歷程。
+          每一個選擇都會影響你的結局——根據政大大學報深度報導改編。
+        </div>
+        <div class="intro-meta">
+          <div class="intro-meta-item"><strong>6</strong>個場景</div>
+          <div class="intro-meta-item"><strong>3種</strong>結局</div>
+          <div class="intro-meta-item"><strong>真實</strong>故事改編</div>
+        </div>
+        <button class="start-btn" onclick="startGame()">開始遊戲 →</button>
+      </div>
+    </div>`;
+}
+
+function renderHeader() {
+  const pct = Math.round((current / scenes.length) * 100);
+  return `
+    <div class="game-header">
+      <span class="game-logo">特選之路</span>
+      <div class="progress-wrap"><div class="progress-fill" id="pbar" style="width:${pct}%"></div></div>
+      <span class="scene-counter">${current + 1} / ${scenes.length}</span>
+    </div>`;
+}
+
+function renderScene(idx) {
+  locked = false; chosen = null; chosenNext = null;
+  const s = scenes[idx];
+  document.getElementById('root').innerHTML = renderHeader() + `
+    <div class="card">
+      <div class="illustration-wrap" style="background:${illusBg(s.badge.type)}">${svgs[s.svg]}</div>
+      <div class="card-body">
+        <span class="badge ${s.badge.type}">${s.badge.text}</span>
+        <div class="scene-hook">${s.hook}</div>
+        <div class="scene-sub">${s.sub}</div>
+        <div class="divider"></div>
+        <div class="scene-text">${s.text.replace(/\n/g,'<br>')}</div>
+      </div>
+      <div class="choices" id="choices">
+        ${s.choices.map((c,i) => `<button class="choice-btn" onclick="choose(${i})">${c.text}</button>`).join('')}
+      </div>
+      <div id="feedback"></div>
+    </div>`;
+}
+
+function illusBg(type) {
+  if (type === 'badge-warn')   return '#FEF3C7';
+  if (type === 'badge-danger') return '#FEE2E2';
+  return '#FDE8D4';
+}
+
+function choose(i) {
+  if (locked) return;
+  locked = true;
+  const s = scenes[current];
+  const c = s.choices[i];
+  chosen = c.outcome; chosenNext = c.next;
+  if (c.outcome === 'good') score++;
+  total++;
+  document.querySelectorAll('.choice-btn').forEach((b, idx) => {
+    b.disabled = true;
+    if (idx === i) {
+      if (c.outcome === 'good')    b.classList.add('correct');
+      else if (c.outcome === 'bad') b.classList.add('wrong');
+      else                          b.classList.add('neutral');
+    }
+  });
+  const fb = s.feedbacks[c.outcome] || s.feedbacks.neutral || '';
+  document.getElementById('feedback').innerHTML =
+    `<div class="feedback-box">${fb}</div>
+     <button class="next-btn" onclick="nextScene()">繼續 →</button>`;
+}
+
+function nextScene() {
+  if (chosenNext === 'end') renderEnd();
+  else { current = chosenNext; renderScene(current); }
+}
+
+function renderEnd() {
+  const e = endings[getEndKey()];
+  document.getElementById('root').innerHTML = `
+    <div class="card">
+      <div class="end-illustration" style="background:#FDE8D4">${svgs[e.svgKey]}</div>
+      <div class="end-body">
+        <span class="badge badge-month">遊戲結束</span>
+        <div class="end-hook">${e.hook}</div>
+        <div class="end-sub">${e.sub}</div>
+        <div class="end-desc">${e.desc}</div>
+        <div class="score-grid">
+          <div class="score-card"><div class="score-label">決策得分</div><div class="score-value">${score} / ${total}</div></div>
+          <div class="score-card"><div class="score-label">你的類型</div><div class="score-value" style="font-size:15px;line-height:1.4">${e.label}</div></div>
+        </div>
+        <div class="source-note">本遊戲根據政大大學報〈特殊選才是否仍足夠特殊？非典型升學路下的挑戰〉專題報導改編，反映真實特選生的歷程與困境。</div>
+        <button class="restart-btn" onclick="restart()">再玩一次</button>
+      </div>
+    </div>`;
+}
+
+function startGame() { current = 0; renderScene(0); }
+function restart() { current = 0; score = 0; total = 0; locked = false; renderScene(0); }
+
+renderIntro();
+</script>
+</body>
+</html>
